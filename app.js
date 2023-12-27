@@ -1,50 +1,52 @@
-// Fetch the JSON data and console log it
+// Sample URL for the data
 const url = "https://2u-data-curriculum-team.s3.amazonaws.com/dataviz-classroom/v1.1/14-Interactive-Web-Visualizations/02-Homework/samples.json";
 
+// Fetch data from the provided URL
 d3.json(url).then(function(data) {
-console.log(data);
+  // Populate dropdown with sample names
+  var dropdown = d3.select("#selDataset");
+  data.names.forEach(function(name) {
+    dropdown.append("option").text(name).property("value", name);
+  });
+
+  // Initial render with the first sample
+  updateBarChart(data.names[0], data);
 });
 
-// Create a horizontal bar chart with a dropdown menu to display the top 10 OTUs found in that individual.
-//     Use sample_values as the x values for the bar chart.
-//     Use otu_ids as the y labels for the bar chart.
-//     Use otu_labels as the hovertext for the chart.
+// Function to update the bar chart based on the selected sample
+function updateBarChart(selectedSample, data) {
+  var selectedData = data.samples.find(sample => sample.id === selectedSample);
 
+  // Extract top 10 values, labels, and hovertext
+  var sampleValues = selectedData.sample_values.slice(0, 10);
+  var otuIds = selectedData.otu_ids.slice(0, 10).map(id => `OTU ${id}`);
+  var otuLabels = selectedData.otu_labels.slice(0, 10);
 
-var dropdown = d3.select("#selDataset");
-    data.names.forEach(function(name) {
-    dropdown.append("option").text(name).property("value", name);
-    });
-
-let slicedData = sortedResults.slice(0, 10);
-
-let trace1 = {
-    x: slicedData.map(object => object.sampleValues),
-    y: slicedData.map(object => object.otu_ids),
-    text: slicedData.map(object => object.otu_labels),
-    name: "OTU's",
+  // Create the horizontal bar chart using Plotly
+  var trace = {
+    x: sampleValues,
+    y: otuIds,
+    text: otuLabels,
     type: "bar",
     orientation: "h"
-};
+  };
 
-  // Data array
-let data = [trace1];
-
-  // Apply a title to the layout
-let layout = {
-    title: "Top 10 OTUs for ${selectedSample}",
+  var layout = {
+    title: `Top 10 OTUs for ${selectedSample}`,
     xaxis: { title: "Sample Values" },
-    yaxis: { title: "OTU IDs" },
-    margin: {
-    l: 100,
-    r: 100,
-    t: 100,
-    b: 100
-    }
-};
+    yaxis: { title: "OTU IDs" }
+  };
 
-  // Render the plot to the div tag with id "plot"
-Plotly.newPlot("plot", data, layout);
+  Plotly.newPlot("barChart", [trace], layout);
+}
+
+// Event listener for dropdown change
+d3.select("#selDataset").on("change", function() {
+  var selectedSample = d3.select(this).property("value");
+  updateBarChart(selectedSample, data);
+});
+
+
 
 // Create a bubble chart that displays each sample.
 //     Use otu_ids for the x values.
