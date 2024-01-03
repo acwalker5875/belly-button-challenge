@@ -16,6 +16,7 @@ d3.json(url).then(function (jsonData) {
     // Initial render with the first sample
     updateBarChart(jsonData.names[0], jsonData);
     updateBubbleChart(jsonData.names[0], jsonData);
+    updateMetadata(jsonData.names[0], jsonData); // Display metadata for the first sample
 });
 
 // Function to update the bar chart based on the selected sample
@@ -84,11 +85,26 @@ function updateBubbleChart(selectedSample, jsonData) {
     Plotly.newPlot("bubbleChart", bubbleData, layout);
 }
 
+// Function to update the sample metadata based on the selected sample
+function updateMetadata(selectedSample, jsonData) {
+    let selectedMetadata = jsonData.metadata.find((meta) => meta.id.toString() === selectedSample);
+
+    // Clear existing metadata display
+    let metadataDisplay = d3.select("#sample-metadata");
+    metadataDisplay.html("");
+
+    // Append key-value pairs to the metadata display
+    Object.entries(selectedMetadata).forEach(([key, value]) => {
+        metadataDisplay.append("p").text(`${key}: ${value}`);
+    });
+}
+
 // Event listener for dropdown change
 d3.select("#selDataset").on("change", function () {
     let selectedSample = d3.select(this).property("value");
     updateBarChart(selectedSample, data);
-    updateBubbleChart(selectedSample, data); // Call the new function for the bubble chart
+    updateBubbleChart(selectedSample, data);
+    updateMetadata(selectedSample, data);
 });
 
 // Function to handle changes in the dropdown selection
@@ -97,12 +113,6 @@ function optionChanged(selectedSample) {
     console.log("Selected sample:", selectedSample);
 }
 
-
-// Display the sample metadata, i.e., an individual's demographic information.
-
-// Display each key-value pair from the metadata JSON object somewhere on the page.
-
-// Update all the plots when a new sample is selected. 
 // Additionally, you are welcome to create any layout that you would like for your dashboard.
 
 
