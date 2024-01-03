@@ -1,12 +1,12 @@
 // Sample URL for the data
 const url = "https://2u-data-curriculum-team.s3.amazonaws.com/dataviz-classroom/v1.1/14-Interactive-Web-Visualizations/02-Homework/samples.json";
 
-let data = {}; 
+let data = {}; // Initialize data as an empty object
 let chartExists = false;
 
 // Fetch data from the provided URL
 d3.json(url).then(function (jsonData) {
-    data = jsonData; 
+    data = jsonData; // Update data after fetching
     // Populate dropdown with sample names
     let dropdown = d3.select("#selDataset");
     jsonData.names.forEach(function (name) {
@@ -15,6 +15,7 @@ d3.json(url).then(function (jsonData) {
 
     // Initial render with the first sample
     updateBarChart(jsonData.names[0], jsonData);
+    updateBubbleChart(jsonData.names[0], jsonData);
 });
 
 // Function to update the bar chart based on the selected sample
@@ -35,7 +36,7 @@ function updateBarChart(selectedSample, jsonData) {
         orientation: "h",
     };
 
-    let plotData = [trace1];
+    let plotData = [trace1]; // Corrected data structure
 
     let layout = {
         title: `Top 10 OTUs for ${selectedSample}`,
@@ -44,35 +45,58 @@ function updateBarChart(selectedSample, jsonData) {
     };
 
     if (chartExists) {
-
+        // If a plot exists, update it
         Plotly.react("barChart", plotData, layout);
     } else {
-
+        // If no plot exists, create a new one
         Plotly.newPlot("barChart", plotData, layout).then(() => {
-            chartExists = true; 
+            chartExists = true; // Set the variable to true after creating the plot
         });
     }
+}
+
+// Function to update the bubble chart based on the selected sample
+function updateBubbleChart(selectedSample, jsonData) {
+    let selectedData = jsonData.samples.find((sample) => sample.id === selectedSample);
+
+    // Create the bubble chart using Plotly
+    let trace2 = {
+        x: selectedData.otu_ids,
+        y: selectedData.sample_values,
+        text: selectedData.otu_labels,
+        mode: 'markers',
+        marker: {
+            size: selectedData.sample_values,
+            color: selectedData.otu_ids,
+            colorscale: 'Earth',
+            opacity: 0.7,
+        },
+    };
+
+    let bubbleData = [trace2];
+
+    let layout = {
+        title: `Bubble Chart for ${selectedSample}`,
+        xaxis: { title: "OTU IDs" },
+        yaxis: { title: "Sample Values" },
+    };
+
+    Plotly.newPlot("bubbleChart", bubbleData, layout);
 }
 
 // Event listener for dropdown change
 d3.select("#selDataset").on("change", function () {
     let selectedSample = d3.select(this).property("value");
     updateBarChart(selectedSample, data);
+    updateBubbleChart(selectedSample, data); // Call the new function for the bubble chart
 });
 
+// Function to handle changes in the dropdown selection
 function optionChanged(selectedSample) {
+    // You can put any logic here to handle the change, such as updating other charts or data
     console.log("Selected sample:", selectedSample);
 }
 
-
-
-
-// Create a bubble chart that displays each sample.
-//     Use otu_ids for the x values.
-//     Use sample_values for the y values.   
-//     Use sample_values for the marker size. 
-//     Use otu_ids for the marker colors.
-//     Use otu_labels for the text values.
 
 // Display the sample metadata, i.e., an individual's demographic information.
 
