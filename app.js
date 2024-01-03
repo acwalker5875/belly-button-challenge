@@ -1,50 +1,69 @@
 // Sample URL for the data
 const url = "https://2u-data-curriculum-team.s3.amazonaws.com/dataviz-classroom/v1.1/14-Interactive-Web-Visualizations/02-Homework/samples.json";
 
-// Fetch data from the provided URL
-d3.json(url).then(function(data) {
-  // Populate dropdown with sample names
-  var dropdown = d3.select("#selDataset");
-  data.names.forEach(function(name) {
-    dropdown.append("option").text(name).property("value", name);
-  });
+let data = {}; 
+let chartExists = false;
 
-  // Initial render with the first sample
-  updateBarChart(data.names[0], data);
+// Fetch data from the provided URL
+d3.json(url).then(function (jsonData) {
+    data = jsonData; 
+    // Populate dropdown with sample names
+    let dropdown = d3.select("#selDataset");
+    jsonData.names.forEach(function (name) {
+        dropdown.append("option").text(name).property("value", name);
+    });
+
+    // Initial render with the first sample
+    updateBarChart(jsonData.names[0], jsonData);
 });
 
 // Function to update the bar chart based on the selected sample
-function updateBarChart(selectedSample, data) {
-  var selectedData = data.samples.find(sample => sample.id === selectedSample);
+function updateBarChart(selectedSample, jsonData) {
+    let selectedData = jsonData.samples.find((sample) => sample.id === selectedSample);
 
-  // Extract top 10 values, labels, and hovertext
-  var sampleValues = selectedData.sample_values.slice(0, 10);
-  var otuIds = selectedData.otu_ids.slice(0, 10).map(id => `OTU ${id}`);
-  var otuLabels = selectedData.otu_labels.slice(0, 10);
+    // Extract top 10 values, labels, and hovertext
+    let sampleValues = selectedData.sample_values.slice(0, 10);
+    let otuIds = selectedData.otu_ids.slice(0, 10).map((id) => `OTU ${id}`);
+    let otuLabels = selectedData.otu_labels.slice(0, 10);
 
-  // Create the horizontal bar chart using Plotly
-  var trace = {
-    x: sampleValues,
-    y: otuIds,
-    text: otuLabels,
-    type: "bar",
-    orientation: "h"
-  };
+    // Create the horizontal bar chart using Plotly
+    let trace1 = {
+        x: sampleValues,
+        y: otuIds,
+        text: otuLabels,
+        type: "bar",
+        orientation: "h",
+    };
 
-  var layout = {
-    title: `Top 10 OTUs for ${selectedSample}`,
-    xaxis: { title: "Sample Values" },
-    yaxis: { title: "OTU IDs" }
-  };
+    let plotData = [trace1];
 
-  Plotly.newPlot("barChart", [trace], layout);
+    let layout = {
+        title: `Top 10 OTUs for ${selectedSample}`,
+        xaxis: { title: "Sample Values" },
+        yaxis: { title: "OTU IDs" },
+    };
+
+    if (chartExists) {
+
+        Plotly.react("barChart", plotData, layout);
+    } else {
+
+        Plotly.newPlot("barChart", plotData, layout).then(() => {
+            chartExists = true; 
+        });
+    }
 }
 
 // Event listener for dropdown change
-d3.select("#selDataset").on("change", function() {
-  var selectedSample = d3.select(this).property("value");
-  updateBarChart(selectedSample, data);
+d3.select("#selDataset").on("change", function () {
+    let selectedSample = d3.select(this).property("value");
+    updateBarChart(selectedSample, data);
 });
+
+function optionChanged(selectedSample) {
+    console.log("Selected sample:", selectedSample);
+}
+
 
 
 
