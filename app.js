@@ -1,12 +1,13 @@
-// Sample URL for the data
+// URL for the data
 const url = "https://2u-data-curriculum-team.s3.amazonaws.com/dataviz-classroom/v1.1/14-Interactive-Web-Visualizations/02-Homework/samples.json";
 
-let data = {}; // Initialize data as an empty object
+// Initialize data as an empty object
+let data = {}; 
 let chartExists = false;
 
 // Fetch data from the provided URL
 d3.json(url).then(function (jsonData) {
-    data = jsonData; // Update data after fetching
+    data = jsonData; 
     // Populate dropdown with sample names
     let dropdown = d3.select("#selDataset");
     jsonData.names.forEach(function (name) {
@@ -16,7 +17,7 @@ d3.json(url).then(function (jsonData) {
     // Initial render with the first sample
     updateBarChart(jsonData.names[0], jsonData);
     updateBubbleChart(jsonData.names[0], jsonData);
-    updateMetadata(jsonData.names[0], jsonData); // Display metadata for the first sample
+    updateMetadata(jsonData.names[0], jsonData);
 });
 
 // Function to update the bar chart based on the selected sample
@@ -37,7 +38,7 @@ function updateBarChart(selectedSample, jsonData) {
         orientation: "h",
     };
 
-    let plotData = [trace1]; // Corrected data structure
+    let plotData = [trace1];
 
     let layout = {
         title: `Top 10 OTUs for ${selectedSample}`,
@@ -85,21 +86,20 @@ function updateBubbleChart(selectedSample, jsonData) {
     Plotly.newPlot("bubbleChart", bubbleData, layout);
 }
 
-// Function to update the sample metadata based on the selected sample
+
 function updateMetadata(selectedSample, jsonData) {
     let selectedMetadata = jsonData.metadata.find((meta) => meta.id.toString() === selectedSample);
 
-    // Clear existing metadata display
+    
     let metadataDisplay = d3.select("#sample-metadata");
     metadataDisplay.html("");
 
-    // Append key-value pairs to the metadata display
+
     Object.entries(selectedMetadata).forEach(([key, value]) => {
         metadataDisplay.append("p").text(`${key}: ${value}`);
     });
 }
 
-// Event listener for dropdown change
 d3.select("#selDataset").on("change", function () {
     let selectedSample = d3.select(this).property("value");
     updateBarChart(selectedSample, data);
@@ -107,20 +107,6 @@ d3.select("#selDataset").on("change", function () {
     updateMetadata(selectedSample, data);
 });
 
-// Function to handle changes in the dropdown selection
 function optionChanged(selectedSample) {
-    // You can put any logic here to handle the change, such as updating other charts or data
     console.log("Selected sample:", selectedSample);
-}
-
-// Additionally, you are welcome to create any layout that you would like for your dashboard.
-
-
-// Deploy your app to a free static page hosting service, such as GitHub Pages. 
-// Submit the links to your deployment AND your GitHub repo. 
-
-// OPTIONAL:
-// Adapt the Gauge Chart from https://plot.ly/javascript/gauge-charts/Links to an external site
-// to plot the weekly washing frequency of the individual.
-// You will need to modify the example gauge code to account for values ranging from 0 through 9.
-// Update the chart whenever a new sample is selected.
+};
